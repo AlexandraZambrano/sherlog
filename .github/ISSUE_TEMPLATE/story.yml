@@ -1,0 +1,35 @@
+# Issue form for a user story: a feature described from the point of view of the person who needs it.
+name: User story
+description: A feature written as "As a ..., I want ..., so that ..."
+title: "[Story] "
+labels: ["type: story"]
+body:
+  - type: textarea
+    id: story
+    attributes:
+      label: User story
+      description: Who needs this, what they want and why.
+      placeholder: As an on-call engineer, I want to see every step the agent took, so that I can trust or question its conclusion.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: A checklist. When every box is ticked, the story is done.
+      value: |
+        - [ ]
+        - [ ]
+    validations:
+      required: true
+  - type: input
+    id: docs
+    attributes:
+      label: Docs page
+      description: The page in `docs/` that explains the concept behind this story.
+      placeholder: docs/elastic.md
+  - type: markdown
+    attributes:
+      value: |
+        After creating the issue, add it to the project board and set Priority, Size, Phase and Level.
+        Link it to its epic as a sub-issue, and add the tasks as sub-issues.

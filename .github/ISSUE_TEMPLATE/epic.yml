@@ -1,0 +1,18 @@
+# Issue form for an epic: a whole roadmap phase made of several stories.
+name: Epic
+description: A whole phase of the roadmap, made of several stories
+title: "[Epic] "
+labels: ["type: epic"]
+body:
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+      description: What is true when this phase is finished?
+    validations:
+      required: true
+  - type: markdown
+    attributes:
+      value: |
+        After creating the issue, set its milestone, add it to the project board and set Priority, Phase and Level.
+        Add the stories as sub-issues.
