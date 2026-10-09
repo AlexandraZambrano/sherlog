@@ -1,0 +1,32 @@
+# Issue form for a task: one small piece of work that belongs to a story.
+name: Task
+description: A small, concrete piece of work that is part of a story
+title: "[Task] "
+labels: ["type: task"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What needs to be done
+      description: Describe the work and why it is needed.
+    validations:
+      required: true
+  - type: input
+    id: parent
+    attributes:
+      label: Parent story
+      description: The story this task belongs to.
+      placeholder: "#10"
+  - type: checkboxes
+    id: done
+    attributes:
+      label: Definition of done
+      options:
+        - label: Code or docs are commented and explained
+        - label: Tests pass in CI
+        - label: PR title follows Conventional Commits and links this issue
+  - type: markdown
+    attributes:
+      value: |
+        After creating the issue, add it to the project board and set Priority, Size, Phase and Level.
+        Add it as a sub-issue of its story.
