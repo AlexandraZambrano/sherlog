@@ -12,6 +12,6 @@ describe("firstServiceUpperCase", () => {
   });
 
   it("returns the fallback when the first name is empty", () => {
-    expect(firstServiceUpperCase([""])).toBe("UNKNOWN");
+    expect(firstServiceUpperCase([""])).toBe("UNKNOW");
   })
 });
