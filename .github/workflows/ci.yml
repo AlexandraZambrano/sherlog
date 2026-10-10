@@ -1,0 +1,24 @@
+# Runs the same checks you run locally on every pull request.
+name: CI
+
+on:
+  pull_request:
+    branches: [main, develop]   # only PRs that target these branches
+
+# The workflow only needs to read the code, so give it no more permission than that.
+permissions:
+  contents: read
+
+jobs:
+  ci:                            # this job name is the check that branch protection will require
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7          # downloads your code onto the runner
+      - uses: actions/setup-node@v7        # installs Node
+        with:
+          node-version: 22                 # the minimum version in package.json "engines"
+          cache: npm                       # reuses downloaded packages between runs
+      - run: npm ci                        # installs exactly what package-lock.json says
+      - run: npm run typecheck                           # type check
+      - run: npm run lint                           # lint
+      - run: npm test                           # tests
