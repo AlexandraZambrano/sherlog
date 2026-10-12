@@ -21,4 +21,19 @@ jobs:
       - run: npm ci                        # installs exactly what package-lock.json says
       - run: npm run typecheck                           # type check
       - run: npm run lint                           # lint
-      - run: npm test                           # tests
+      - run: npm run test:unit
+      - run: npm run test:integration
+    services:
+      elasticsearch:
+        image: docker.elastic.co/elasticsearch/elasticsearch:9.5.1   # keep equal to ELASTIC_VERSION in .env.example
+        env:
+          discovery.type: single-node
+          xpack.security.enabled: "false"
+          ES_JAVA_OPTS: -Xms512m -Xmx512m      # smaller than local: CI runners have little memory
+        ports:
+          - 9200:9200
+        options: >-
+          --health-cmd "curl -fs http://localhost:9200/_cluster/health"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 30
