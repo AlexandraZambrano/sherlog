@@ -1,3 +1,11 @@
+# The OpenTelemetry Demo (core layer), copied into demo/. Its variables come from its
+# own .env, then .env.override, which wins because it is listed last.
+include:
+  - path: demo/compose.yaml
+    project_directory: demo
+    env_file:
+      - demo/.env
+      - demo/.env.override
 # Local Elasticsearch and Kibana for development. Start with: docker compose up -d
 services:
   elasticsearch:
