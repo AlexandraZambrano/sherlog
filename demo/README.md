@@ -37,3 +37,10 @@ and Kibana replace the observability stack.
 1. Clone the new tag of the demo into a temporary folder.
 2. Copy the same files over this folder and review `git diff`.
 3. Update the version in `.env.override` and in this file.
+
+## Changes from the original
+- `src/otel-collector/otelcol-config-extras.yml`: the demo's file for adding your own exporters.
+  It now sends traces, metrics and logs to Elasticsearch, and flushes each batch every 1 second
+  (the default is 10 seconds). With 10 seconds, the exporter held data for as long as the demo's
+  OpenTelemetry libraries wait before giving up, so most of it was dropped. Everything else in
+  the folder is unchanged.
