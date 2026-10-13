@@ -8,7 +8,8 @@
   "description": "An AI agent that investigates production incidents using logs, metrics and traces from Elasticsearch.",
   "scripts": {
     "test": "npm run test:unit && npm run test:integration",
-    "test:unit": "vitest run --exclude '**/*.integration.test.ts'",
+    "test:unit": "vitest run --exclude '**/*.integration.test.ts' --exclude '**/*.pipeline.test.ts'",
+    "test:pipeline": "vitest run pipeline",
     "test:integration": "vitest run integration",
     "typecheck": "tsc",
     "lint": "eslint ."
