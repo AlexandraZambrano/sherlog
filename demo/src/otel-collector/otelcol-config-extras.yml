@@ -1,33 +1,24 @@
 # Copyright The OpenTelemetry Authors
 # SPDX-License-Identifier: Apache-2.0
 
-# Extras/customization layer for the OTel Collector.
-# Override this file in your fork to add exporters for your own observability backend.
-#
-# This file is intentionally empty. It is always loaded last, giving forks
-# a stable, well-defined seam to customize without touching upstream files.
-#
-# IMPORTANT: The OTel Collector merges config files but REPLACES arrays, not appends.
-# If you want to keep the default observability stack alongside your own exporters,
-# you must explicitly repeat the upstream exporter names in your pipeline definitions.
-#
-# Upstream exporter names (repeat these to keep them active):
-#   traces:  otlp_grpc/jaeger, debug, span_metrics
-#   metrics: otlp_http/prometheus, debug
-#   logs:    opensearch, debug
-#
-# Example:
-#
-# exporters:
-#   otlp_grpc/mybackend:
-#     endpoint: https://ingest.mybackend.com
-#
-# service:
-#   pipelines:
-#     traces:
-#       exporters: [otlp_grpc/jaeger, debug, span_metrics, otlp_grpc/mybackend]  # repeat upstream exporters
-#     metrics:
-#       receivers: [docker_stats, http_check/frontend-proxy, host_metrics, nginx, otlp, redis, span_metrics]
-#       exporters: [otlp_http/prometheus, debug, otlp_grpc/mybackend]           # repeat upstream exporters
-#     logs:
-#       exporters: [opensearch, debug, otlp_grpc/mybackend]                     # repeat upstream exporters
+# Sherlog: send everything the collector receives to Elasticsearch, in addition to the
+# debug output. The collector REPLACES lists instead of adding to them, so the names that
+# were already there (debug, span_metrics) are repeated.
+exporters:
+  elasticsearch:
+    endpoint: http://elasticsearch:9200   # "elasticsearch" is the container's name on the Docker network
+    sending_queue:
+      batch:
+      # The exporter waits up to 10 s to fill a batch, and the shop's OpenTelemetry libraries
+      # give up after 10 s, so most data was dropped ("context canceled"). Flushing every 1 s
+      # keeps the wait well below that limit.
+        flush_timeout: 1s
+
+service:
+  pipelines:
+    traces:
+      exporters: [debug, span_metrics, elasticsearch]
+    metrics:
+      exporters: [debug, elasticsearch]
+    logs:
+      exporters: [debug, elasticsearch]
