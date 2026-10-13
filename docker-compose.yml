@@ -8,6 +8,14 @@ include:
       - demo/.env.override
 # Local Elasticsearch and Kibana for development. Start with: docker compose up -d
 services:
+  # Stand-in for the demo's AI shop assistant. The demo's load generator calls
+  # http://agent:8010/prompt, but we do not run the demo's assistant layer, so those calls
+  # failed with a DNS error (about 6.5% of all requests). This tiny server answers 200 to
+  # everything. It is a stub, not a real assistant. See demo/README.md.
+  agent:
+    image: hashicorp/http-echo:1.0.0   # pinned, supports arm64
+    command: ["-listen=:8010", "-text=ok"]
+    mem_limit: 16m
   elasticsearch:
     # The version comes from .env; the :? makes compose stop with a message if it is missing.
     image: docker.elastic.co/elasticsearch/elasticsearch:${ELASTIC_VERSION:?Set ELASTIC_VERSION in .env}
