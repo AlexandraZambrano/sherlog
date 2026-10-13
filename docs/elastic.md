@@ -81,3 +81,24 @@ Shows what Elasticsearch printed. Use it when something does not start. Replace
    2 GB and Kibana uses about 1 GB, so Docker needs more than that available, and more
    again once the demo shop is added.
 3. Check that port 9200 or 5601 is not already used by another program.
+
+#### Error: `network opentelemetry-demo was found but has incorrect label`
+
+This happened on the first `docker compose up -d` after adding the OpenTelemetry Demo. Docker
+swapped the old network for the demo's network (`opentelemetry-demo`) and complained about
+its label, which also stopped Elasticsearch and Kibana. Your data is safe, because it lives in
+the `es-data` volume. Run the command again:
+
+```bash
+docker compose up -d
+```
+
+If the same error appears, remove the empty network and run it once more:
+
+```bash
+docker network rm opentelemetry-demo
+docker compose up -d
+```
+
+Also run `docker compose pull` before the very first `up`, so Docker downloads the ready-made
+demo images instead of trying to build them (the demo's source code is not in this repository).
