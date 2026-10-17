@@ -2,6 +2,7 @@
 // It needs the whole stack running (docker compose up -d), so it is NOT part of CI.
 import { describe, it, expect } from "vitest";
 import { createElasticClient } from "./client";
+import { DATA_STREAMS, FIELDS } from "./schema";
 
 const ELASTICSEARCH_URL = process.env.ELASTICSEARCH_URL ?? "http://localhost:9200";
 
@@ -9,22 +10,22 @@ const ELASTICSEARCH_URL = process.env.ELASTICSEARCH_URL ?? "http://localhost:920
 const expectations = [
   {
     signal: "traces",
-    dataStream: "traces-generic.otel-default",
-    fields: ["@timestamp", "trace_id", "span_id", "duration", "resource.attributes.service.name"],
+    dataStream: DATA_STREAMS.traces,
+    fields: [FIELDS.timestamp, FIELDS.traceId, FIELDS.spanId, FIELDS.duration, FIELDS.serviceName],
   },
   // ...one entry for logs and one for metrics (use the field names from my probe):
   //   logs:    @timestamp, trace_id, span_id, body, resource.attributes.service.name
     {
     signal: "logs",
-    dataStream: "logs-generic.otel-default",
-    fields: ["@timestamp", "trace_id", "span_id", "body.text", "resource.attributes.service.name"],
+    dataStream: DATA_STREAMS.logs,
+    fields: [FIELDS.timestamp, FIELDS.traceId, FIELDS.spanId, FIELDS.logText, FIELDS.serviceName],
   },
   //   metrics: @timestamp, resource.attributes.service.name
 
       {
     signal: "metrics",
-    dataStream: "metrics-generic.otel-default",
-    fields: ["@timestamp", "resource.attributes.service.name"],
+    dataStream: DATA_STREAMS.metrics,
+    fields: [FIELDS.timestamp, FIELDS.serviceName],
   },
 ];
 

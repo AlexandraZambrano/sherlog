@@ -1,3 +1,5 @@
+import { FIELDS } from "../elastic/schema";
+
 // A time window: the frame of time a tool looks at. Always handled in UTC.
 
 /** From one moment (included) to another (excluded). */
@@ -26,5 +28,6 @@ export function lastMinutes(minutes: number, now: Date): TimeWindow {
 /** The ES|QL condition that keeps only documents inside the window. `from` is included, `to` is not. */
 export function toEsqlCondition(window: TimeWindow): string {
   // FIX 2: the parentheses. Without them we write the function itself instead of calling it.
-  return `@timestamp >= "${window.from.toISOString()}" AND @timestamp < "${window.to.toISOString()}"`;
+  return `${FIELDS.timestamp} >= "${window.from.toISOString()}" AND ${FIELDS.timestamp} < "${window.to.toISOString()}"`;
 }
+
