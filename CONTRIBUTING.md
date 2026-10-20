@@ -37,7 +37,7 @@ Pull requests into `develop` are **squash merged**, so the PR title becomes the 
 - Open the PR against `develop`, and link the issue with `Closes #<number>`.
 - Explain what changed and why.
 - All automatic checks (lint, type check, unit and integration tests) must pass before it can be merged.
-- New behaviour comes with tests. A bug fix starts with a test that reproduces the bug.
+- New behaviour starts with a failing test, and a bug fix starts with a test that reproduces the bug. How we test, and the test-first cycle, are in [docs/testing.md](docs/testing.md).
 
 ## Code style
 
