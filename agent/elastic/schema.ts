@@ -26,3 +26,6 @@ export const FIELDS = {
 /** Values that some fields can have. */
 export const SPAN_STATUS = { error: "Error" } as const;
 export const SPAN_KIND = { server: "Server", client: "Client" } as const;
+
+/** The data stream names a tool reads from. Passed in, so a test can point a tool at its own index. */
+export type DataStreamNames = { readonly [Kind in keyof typeof DATA_STREAMS]: string };

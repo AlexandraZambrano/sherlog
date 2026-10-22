@@ -1,5 +1,6 @@
 // The contract every Sherlog tool follows: what goes in, what comes out.
 import type { Client } from "@elastic/elasticsearch";
+import type { DataStreamNames } from "../elastic/schema";
 
 /**
  * What a tool needs from the outside world. It is passed in and never created inside a tool,
@@ -7,6 +8,7 @@ import type { Client } from "@elastic/elasticsearch";
  */
 export type ToolDeps = {
   readonly client: Client;
+  readonly dataStreams: DataStreamNames;
 };
 
 /** What every tool returns: the answer, and the exact query that produced it. */
