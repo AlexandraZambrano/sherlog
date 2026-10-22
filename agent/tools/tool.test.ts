@@ -2,6 +2,7 @@
 import { describe, it, expect } from "vitest";
 import type { Client } from "@elastic/elasticsearch";
 import type { Tool } from "./tool";
+import { DATA_STREAMS } from "../elastic/schema";
 
 // A fake tool: takes a number and returns its double, together with the query it "ran".
 const doubleTool: Tool<{ n: number }, { doubled: number }> = {
@@ -13,7 +14,7 @@ const doubleTool: Tool<{ n: number }, { doubled: number }> = {
 describe("Tool contract", () => {
   it("returns the answer together with the query that produced it", async () => {
     // The fake tool never touches Elasticsearch, so the client can be a placeholder.
-    const deps = { client: undefined as unknown as Client };
+    const deps = { client: undefined as unknown as Client, dataStreams: DATA_STREAMS };
     const result = await doubleTool.run({ n: 21 }, deps);
     expect(result.data.doubled).toBe(42);
     expect(result.query).toBe("FROM nothing");
