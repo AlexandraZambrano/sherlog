@@ -29,6 +29,7 @@ const MAPPINGS: Record<FixtureKind, estypes.MappingTypeMapping> = {
       trace_id: { type: "keyword" },
       span_id: { type: "keyword" },
       body: { properties: { text: { type: "match_only_text" } } },
+      severity_text: { type: "keyword" },
       resource: RESOURCE_MAPPING,
     },
   },
