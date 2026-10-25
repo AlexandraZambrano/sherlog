@@ -20,7 +20,8 @@ export const FIELDS = {
   spanKind: "kind",
   duration: "duration",          // in nanoseconds
   statusCode: "status.code",        // empty, "Ok" or "Error"
-  logText: "body.text",           // the text of a log line
+  logText: "body.text",          // the text of a log line
+  severityText: "severity_text",   // the log level, written in several ways (WARN, warn...), or empty
 } as const;
 
 /** Values that some fields can have. */
