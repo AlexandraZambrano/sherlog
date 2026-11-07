@@ -1,6 +1,6 @@
 // Tests for search_logs: the pure parts, which need no Elasticsearch.
 import { describe, it, expect } from "vitest";
-import { buildSearchLogsQuery, normalizeLimit, parseSearchLogsRows } from "./search-logs";
+import { buildSearchLogsQuery, normalizeLimit, parseSearchLogsRows, searchLogsInput } from "./search-logs";
 import { between } from "./time-window";
 
 describe("normalizeLimit", () => {
@@ -91,5 +91,31 @@ describe("parseSearchLogsRows", () => {
 
   it("keeps a log without message or service", () => {
     expect(parseSearchLogsRows([row(null, null, 4)], 10).patterns[0]).toMatchObject({ service: null, message: null, count: 4 });
+  });
+});
+
+describe("searchLogsInput", () => {
+  // What the model writes, and what the tool receives once the times are read as dates.
+  const window = { from: "2026-10-14T20:00:00Z", to: "2026-10-14T20:08:00Z" };
+  const parsedWindow = { from: new Date("2026-10-14T20:00:00Z"), to: new Date("2026-10-14T20:08:00Z") };
+
+  it("needs only the window, and leaves the filters out when they are not given", () => {
+    expect(searchLogsInput.parse({ window })).toEqual({ window: parsedWindow });
+  });
+
+  it("reads every filter", () => {
+    const input = searchLogsInput.parse({ window, service: "payment", text: "invalid token", problemsOnly: true, limit: 5 });
+
+    expect(input).toEqual({ window: parsedWindow, service: "payment", text: "invalid token", problemsOnly: true, limit: 5 });
+  });
+
+  it("rejects an empty service or an empty text", () => {
+    expect(searchLogsInput.safeParse({ window, service: "" }).success).toBe(false);
+    expect(searchLogsInput.safeParse({ window, text: "" }).success).toBe(false);
+  });
+
+  it("rejects values of the wrong type instead of guessing what the model meant", () => {
+    expect(searchLogsInput.safeParse({ window, problemsOnly: "yes" }).success).toBe(false);
+    expect(searchLogsInput.safeParse({ window, limit: "10" }).success).toBe(false);
   });
 });

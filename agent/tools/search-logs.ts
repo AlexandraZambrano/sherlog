@@ -4,6 +4,8 @@ import { esqlString } from "../elastic/esql-string";
 import { toEsqlCondition, type TimeWindow } from "./time-window";
 import { runEsql } from "../elastic/run-esql";
 import type { Tool } from "./tool";
+import { z } from "zod";
+import { timeWindowInput } from "./model-input";
 
 const DEFAULT_LIMIT = 10;
 const MAX_LIMIT = 50;
@@ -18,6 +20,16 @@ export type SearchLogsInput = {
   readonly problemsOnly?: boolean;
   readonly limit?: number;
 };
+
+/** What the model writes to call the tool, read as the tool's input. Only the window is required. */
+export const searchLogsInput = z.object({
+  window: timeWindowInput.describe("The period to search: a UTC start time and a later UTC end time"),
+  service: z.string().min(1).optional().describe("Only the logs of this service, as listed by list_services"),
+  text: z.string().min(1).optional().describe("Only the logs whose message contains these words"),
+  problemsOnly: z.boolean().optional().describe("true to keep only warnings and errors"),
+  limit: z.number().optional().describe("How many message groups to return, from 1 to 50. The default is 10"),
+}) satisfies z.ZodType<SearchLogsInput>;
+
 
 /** The number of message groups to return: a whole number from 1 to 50, and 10 when none is given. */
 export function normalizeLimit(limit: number | undefined): number {
@@ -94,6 +106,7 @@ export const searchLogs: Tool<SearchLogsInput, SearchLogsOutput> = {
   description:
     "Searches the logs of a time window and groups them by service and message, most frequent first. " +
     "Filters: a service, a text, and problemsOnly (warnings and errors). `truncated` is true when more messages exist than the limit.",
+  inputSchema: searchLogsInput,
   run: async (input, deps) => {
     const query = buildSearchLogsQuery(input, deps.dataStreams.logs);
     const rows = await runEsql<SearchLogsRow>(deps.client, query);

@@ -3,6 +3,8 @@ import { esqlString } from "../elastic/esql-string";
 import { toEsqlCondition, type TimeWindow } from "./time-window";
 import { runEsql } from "../elastic/run-esql";
 import type { Tool } from "./tool";
+import { z } from "zod";
+import { timeWindowInput } from "./model-input";
 
 // The error_rate tool: how often the requests of a service fail, compared with normal.
 
@@ -28,6 +30,13 @@ export type ErrorRateInput = {
   readonly window: TimeWindow;
   readonly baseline: TimeWindow;
 };
+
+/** What the model writes to call the tool, read as the tool's input. */
+export const errorRateInput = z.object({
+  service: z.string().min(1, "service must not be empty").describe("The service to look at, as listed by list_services"),
+  window: timeWindowInput.describe("The period to investigate: a UTC start time and a later UTC end time"),
+  baseline: timeWindowInput.describe("An earlier period that stands for normal. It must not overlap the window"),
+}) satisfies z.ZodType<ErrorRateInput>;
 
 /** True when the two windows share some time. A window that ends exactly when the other starts does not overlap. */
 function overlaps(a: TimeWindow, b: TimeWindow): boolean {
@@ -92,6 +101,7 @@ export const errorRate: Tool<ErrorRateInput, ErrorRateOutput> = {
   description:
     "Error rate of a service in a time window, compared with an earlier baseline window. " +
     "The rate is null when the service received no requests in that period: that means no data, not 0%.",
+  inputSchema: errorRateInput,
   run: async (input, deps) => {
     const query = buildErrorRateQuery(input, deps.dataStreams.traces);
     const rows = await runEsql<ErrorRateRow>(deps.client, query);
