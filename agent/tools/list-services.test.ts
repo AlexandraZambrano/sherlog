@@ -1,7 +1,7 @@
 // Tests for list_services: the pure parts, which need no Elasticsearch.
 import { describe, it, expect } from "vitest";
 import { between } from "./time-window";
-import { buildListServicesQuery, parseListServicesRows } from "./list-services";
+import { buildListServicesQuery, listServicesInput, parseListServicesRows } from "./list-services";
 
 describe("buildListServicesQuery", () => {
   it("counts spans per service inside the window, busiest first", () => {
@@ -31,5 +31,23 @@ describe("parseListServicesRows", () => {
 
   it("returns an empty list when no service reported data", () => {
     expect(parseListServicesRows([])).toEqual({services: []});
+  });
+});
+
+describe("listServicesInput", () => {
+  it("reads what the model writes as the input of the tool", () => {
+    const input = listServicesInput.parse({ window: { from: "2026-10-14T20:00:00Z", to: "2026-10-14T20:08:00Z" } });
+
+    expect(input).toEqual({ window: { from: new Date("2026-10-14T20:00:00Z"), to: new Date("2026-10-14T20:08:00Z") } });
+  });
+
+  it("rejects a call without the window", () => {
+    expect(listServicesInput.safeParse({}).success).toBe(false);
+  });
+
+  it("points to the exact field that has a bad time", () => {
+    const result = listServicesInput.safeParse({ window: { from: "yesterday", to: "2026-10-14T20:00:00Z" } });
+
+    expect(result.success ? [] : result.error.issues[0]?.path).toEqual([ "window", "from" ]);
   });
 });

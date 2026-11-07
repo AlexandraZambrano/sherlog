@@ -1,6 +1,6 @@
 // Tests for error_rate: the pure parts, which need no Elasticsearch.
 import { describe, it, expect } from "vitest";
-import { buildErrorRateQuery, makeRateSample, parseErrorRateRows } from "./error-rate";
+import { buildErrorRateQuery, errorRateInput, makeRateSample, parseErrorRateRows } from "./error-rate";
 import { between } from "./time-window";
 
 
@@ -50,11 +50,11 @@ describe("parseErrorRateRows", () => {
             { period: "baseline", requests: 78, errors: 0 },
             { period: "current", requests: 25, errors: 11 },
         ];
-        expect(parseErrorRateRows(rows, "payment")).toEqual({ 
-            service: "payment", 
+        expect(parseErrorRateRows(rows, "payment")).toEqual({
+            service: "payment",
             current: { requests: 25, errors: 11, rate: 0.44 },
             baseline: { requests: 78, errors: 0, rate: 0 },
-            change: 0.44 
+            change: 0.44
         });
     });
 
@@ -76,4 +76,37 @@ describe("parseErrorRateRows", () => {
             change: null
         })
     });
+});
+
+describe("errorRateInput", () => {
+  // What the model writes: times as text, in the shape of the tool's input.
+  const fromModel = {
+    service: "payment",
+    window: { from: "2026-10-14T20:00:00Z", to: "2026-10-14T20:08:00Z" },
+    baseline: { from: "2026-10-14T19:00:00Z", to: "2026-10-14T19:08:00Z" },
+  };
+
+  it("reads what the model writes as the input of the tool", () => {
+    expect(errorRateInput.parse(fromModel)).toEqual({
+      service: "payment",
+      window: { from: new Date("2026-10-14T20:00:00Z"), to: new Date("2026-10-14T20:08:00Z") },
+      baseline: { from: new Date("2026-10-14T19:00:00Z"), to: new Date("2026-10-14T19:08:00Z") }
+     });
+  });
+
+  it("rejects a call without the service", () => {
+    const withoutService = { window: fromModel.window, baseline: fromModel.baseline };
+
+    expect(errorRateInput.safeParse(withoutService).success).toBe(false);
+  });
+
+  it("rejects an empty service name", () => {
+    expect(errorRateInput.safeParse({ ...fromModel, service: "" }).success).toBe(false);
+  });
+
+  it("points to the exact field that has a bad time", () => {
+    const result = errorRateInput.safeParse({ ...fromModel, baseline: { from: "yesterday", to: "2026-10-14T19:08:00Z" } });
+
+    expect(result.success ? [] : result.error.issues[0]?.path).toEqual(["baseline", "from"]);
+  });
 });

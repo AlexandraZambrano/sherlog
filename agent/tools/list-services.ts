@@ -3,6 +3,8 @@ import { FIELDS } from "../elastic/schema";
 import { toEsqlCondition, type TimeWindow } from "./time-window";
 import { runEsql } from "../elastic/run-esql";
 import type { Tool } from "./tool";
+import { z } from "zod";
+import { timeWindowInput } from "./model-input";
 
 /** Builds the ES|QL query that counts spans per service inside the window, busiest first. */
 export function buildListServicesQuery(window: TimeWindow, dataStream: string): string {
@@ -41,10 +43,16 @@ export function parseListServicesRows(rows: readonly ListServicesRow[]): ListSer
 /** What to ask: which period to look at. */
 export type ListServicesInput = { readonly window: TimeWindow };
 
+/** What the model writes to call the tool: the period to look at, read as the tool's input. */
+export const listServicesInput = z.object({
+  window: timeWindowInput.describe("The period to look at: a UTC start time and a later UTC end time"),
+}) satisfies z.ZodType<ListServicesInput>;
+
 /** The tool: lists the services that reported spans in a window, busiest first. */
 export const listServices: Tool<ListServicesInput, ListServicesOutput> = {
   name: "list_services",
   description: "Lists the services that reported data in a time window, with how many spans each sent.",
+  inputSchema: listServicesInput,
   run: async (input, deps) => {
     const query = buildListServicesQuery(input.window, deps.dataStreams.traces);
     const rows = await runEsql<ListServicesRow>(deps.client, query);
