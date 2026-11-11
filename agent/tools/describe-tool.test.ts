@@ -1,25 +1,16 @@
 // Checks that a tool is described to the model with its name, its purpose and the arguments it accepts.
 import { describe, it, expect } from "vitest";
-import { z } from "zod";
 import { describeTool } from "./describe-tool";
-import type { Tool } from "./tool";
+import { doubleTool } from "./fake-double-tool";
 import { listServices } from "./list-services";
 import { errorRate } from "./error-rate";
 import { searchLogs } from "./search-logs";
-
-// A fake tool, so the first tests do not depend on a real one.
-const doubleTool: Tool<{ n: number }, { doubled: number }> = {
-  name: "double",
-  description: "Doubles a number. Only used to test describeTool.",
-  inputSchema: z.object({ n: z.number() }),
-  run: (input) => Promise.resolve({ query: "FROM nothing", data: { doubled: input.n * 2 } }),
-};
 
 describe("describeTool", () => {
   it("gives the model the name, the description and the arguments of the tool", () => {
     expect(describeTool(doubleTool)).toEqual({
       name: "double",
-      description: "Doubles a number. Only used to test describeTool.",
+      description: "Doubles a number. Only used in tests.",
       parameters: {
         type: "object",
         properties: { n: { type: "number" }},
