@@ -9,7 +9,7 @@ import type { Tool, ToolDeps } from "./tool";
  * checks the input before the tool runs.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-type AnyTool = Tool<any, unknown>;
+export type AnyTool = Tool<any, unknown>;
 
 /** What a model tool call gives back: the tool's answer with its query, or a message the model can act on. */
 export type ToolCallOutcome =
